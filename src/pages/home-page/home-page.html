@@ -1,0 +1,49 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+
+  
+
+   <ion-item *ngFor="let item of items">
+      <h2>{{ item.title }} </h2>
+      <button
+         ion-button
+         color="primary"
+         item-right
+         (click)="viewEntry({ record: item })">View</button>
+   </ion-item>
+
+</ion-content>
+
+
+<ion-footer>
+  <ion-toolbar>
+    <button class="add" ion-button block item-left icon-right margin-bottom color="primary" (click)="addEntry()">
+      Déposer une annonce
+      <ion-icon name="add"></ion-icon>
+    </button>
+  </ion-toolbar>
+</ion-footer>
+
+
+
+
+
+
+<!--
+<ion-content padding>
+  <ion-tabs #myTabs>
+    <ion-tab tabIcon="home" [root]="tabHome" [rootParams]="homeParams" tabTitle="Accueil" ></ion-tab>
+    <ion-tab tabIcon="heart" [root]="tabOffers" [rootParams]="offerParams" tabTitle="Offres"></ion-tab>
+    <ion-tab tabIcon="star" [root]="tabRequests" [rootParams]="requestParams" tabTitle="Demandes"></ion-tab>
+  </ion-tabs>
+
+</ion-content>-->
+
+

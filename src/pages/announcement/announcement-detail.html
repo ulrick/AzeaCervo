@@ -1,0 +1,11 @@
+
+<announcement-detail [announcement]="selectedAnnouncement">
+    <div *ngIf="announcement">
+        <h2>{{announcement.title}} details!</h2>
+        <div><label>id: </label>{{announcement.id}}</div>
+        <div>
+            <label>name: </label>
+            <input [(ngModel)]="announcement.title" placeholder="name"/>
+        </div>
+    </div>
+  </announcement-detail>

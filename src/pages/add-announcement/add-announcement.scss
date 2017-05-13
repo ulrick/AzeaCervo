@@ -1,0 +1,59 @@
+page-add-announcement {
+
+    * {
+        box-sizing: border-box;
+    }
+
+    ion-icon {
+        font-size: 1.8em !important;
+    }
+
+    /*.photo-area{
+        position : relative;
+        min-height : 150px;
+        max-height : 250px;
+    }*/
+
+    .add.btn-center {
+        margin : 10% !important;
+    }
+
+    .img-content{
+        position : relative;
+        /*height: 305px;*/
+        overflow: hidden;
+        text-align: center !important;
+        vertical-align: middle;
+    }
+
+    .img{
+        height: 100%;
+        width: auto;
+        max-width: 300%;
+        text-align: center;
+    }
+
+    .add.btn-right{
+        position : absolute;
+        top : 35%;
+        left : 35%;
+    }
+
+    .btn-delete{
+        position : absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .item-divider {
+        color : gray;
+    }
+
+    .text-input-md::placeholder { /* Chrome/Opera/Safari */
+        color: #FF9800;
+        font-size : 0.7em;
+        font-weight : lighter;
+        letter-spacing: 1px;
+    }
+    
+}
