@@ -1,2 +1,2 @@
 # AzeaCervo
-Online sales application. Ad publications
+**Online sales application. Ad publications**
