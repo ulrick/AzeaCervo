@@ -11,6 +11,9 @@ import { SpinnerDialog } from '@ionic-native/spinner-dialog';
 import { Announcement } from "../announcement/announcement";
 
 import 'rxjs/add/operator/map';
+import { AnnouncementService } from "../../providers/announcement-service";
+import { Utils } from "../../model/utils";
+import { TARGET_PHOTO_FOLDER } from "../../model/consts";
 
 
 declare var cordova: any;
@@ -25,7 +28,7 @@ declare var cordova: any;
 @IonicPage()
 @Component({
   selector: 'page-add-announcement',
-  templateUrl: 'add-announcement.html',
+  templateUrl: 'add-announcement.html'
 })
 export class AddAnnouncement {
 
@@ -57,19 +60,20 @@ export class AddAnnouncement {
 
 
   // Initialise module classes
-   constructor(public navCtrl           : NavController,
-               public http              : Http,
-               public navParams         : NavParams,
-               public formBuilder       : FormBuilder,
-               public toastCtrl         : ToastController,
-               public camera            : Camera,
-               public actionSheetCtrl   : ActionSheetController, 
-               public platform          : Platform, 
-               public loadingCtrl       : LoadingController, 
-               public filePath          : FilePath, 
-               public file              : File,
-               private transfer         : Transfer,
-               private spinnerDialog    : SpinnerDialog)
+   constructor( 
+                public navCtrl              : NavController,
+                public http                 : Http,
+                public navParams            : NavParams,
+                public formBuilder          : FormBuilder,
+                public toastCtrl            : ToastController,
+                public camera               : Camera,
+                public actionSheetCtrl      : ActionSheetController, 
+                public platform             : Platform, 
+                public loadingCtrl          : LoadingController,
+                public filePath             : FilePath, 
+                public file                 : File,
+                private transfer            : Transfer,
+                private spinnerDialog       : SpinnerDialog)
    {
        this.announcement = {
             id: null,
@@ -223,7 +227,7 @@ export class AddAnnouncement {
     {
         
         this.announcement = this.form.value;
-        this.announcement.date = this.getDateToRegister();
+        this.announcement.date = Utils.getDateToRegister();
 
         if(this.isEdited){
             //console.log(this.announcement);
@@ -376,7 +380,7 @@ export class AddAnnouncement {
             //this.images = [];
             this.lastImage = img;
             this.hideBtn = this.images.length == 1 ? false : true;
-            return img !== null ? this.targetFolder + img : '';
+            return img !== null ? TARGET_PHOTO_FOLDER + img : '';
             
         }
         else{
@@ -433,18 +437,9 @@ export class AddAnnouncement {
 
 
     /**
-     *  Converts current date to format YYYY-MM-DD hh:mm:ss to register into the database
-     */
-    private getDateToRegister() {
-        let dateNow = new Date().toISOString(); // Date is converted to the following format 2017-05-08T17:13:24.852Z format
-        let parts = dateNow.split('.')[0].split('T').join(' ');
-      
-        return parts;
-	}
-
-
-    /**
      * Split images string get from database into an array if there are many.
+     * @param img
+     * @return {string[]} Image absolute path
      */
     private splitImageString(img: string) : string[]{
         let images : string[] = [];

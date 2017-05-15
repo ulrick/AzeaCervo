@@ -36,6 +36,9 @@
                     <ion-icon name="ios-camera-outline"> </ion-icon>
                     Ajouter des photos
                   </button>
+                  <p item-right [hidden]="lastImage !== null"><span>Astuces :</span> 
+                    Une annonce avec photo est 10 fois plus consultée qu'une annonce sans photo
+                  </p>
                 </ion-col>
 
                 <ion-col *ngFor="let img of images" col-6 text-center class="column">

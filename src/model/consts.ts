@@ -47,3 +47,11 @@ export const DISTRICT: IDistrict[] = [
         name: "Maritime"
     }
 ];
+
+export const BASE_URI: string = "http://www.manasse-yawo.com/azea-cervo";
+
+
+/**
+ * Target the uploads photo folder : "http://www.manasse-yawo.com/azea-cervo/uploads/"
+ */
+export const TARGET_PHOTO_FOLDER: string = "http://www.manasse-yawo.com/azea-cervo/uploads/";

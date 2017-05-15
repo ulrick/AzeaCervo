@@ -8,4 +8,5 @@ export class Announcement {
     price : number;
     date : string;
     photo : string;
+    imgThumb?:string;
 }

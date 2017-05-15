@@ -20,6 +20,7 @@ import { FilePath } from "@ionic-native/file-path";
 import { Transfer } from "@ionic-native/transfer";
 import { File } from "@ionic-native/file";
 import { SpinnerDialog } from '@ionic-native/spinner-dialog';
+import { AnnouncementService } from "../providers/announcement-service";
 
 @NgModule({
   declarations: [
@@ -66,7 +67,8 @@ import { SpinnerDialog } from '@ionic-native/spinner-dialog';
     File,
     Transfer,
     SpinnerDialog,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    AnnouncementService
   ]
 })
 export class AppModule {}

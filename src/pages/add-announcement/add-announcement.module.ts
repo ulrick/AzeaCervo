@@ -7,7 +7,7 @@ import { AddAnnouncement } from "./add-announcement";
     AddAnnouncement,
   ],
   imports: [
-    IonicPageModule.forChild(AddAnnouncement),
+    IonicPageModule.forChild(AddAnnouncement)
   ],
   exports: [
     AddAnnouncement

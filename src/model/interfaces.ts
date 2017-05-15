@@ -18,3 +18,8 @@ export interface IAnnouncement {
 
     onSelect(event: any, announcement: Announcement):void;
 }
+
+export interface IAnnouncementService {
+
+    getAnnouncements() : void;
+} 
