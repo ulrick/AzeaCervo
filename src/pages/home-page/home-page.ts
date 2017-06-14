@@ -9,7 +9,7 @@ import { AnnouncementComponent } from '../announcement/announcement.component';
 import { Announcement } from "../announcement/announcement";
 import 'rxjs/add/operator/map';
 import { AnnouncementService } from "../../providers/announcement-service";
-import { IAnnouncementService } from "../../model/interfaces";
+import { IAnnouncementService, IHomePage } from "../../model/interfaces";
 import { TARGET_PHOTO_FOLDER } from "../../model/consts";
 import { Utils } from "../../model/utils";
 
@@ -19,7 +19,7 @@ import { Utils } from "../../model/utils";
   templateUrl: 'home-page.html',
   providers: [AnnouncementService]
 })
-export class HomePage implements OnInit, IAnnouncementService {
+export class HomePage implements OnInit, IAnnouncementService, IHomePage {
 
     private lastRecordParam: any;
     private announcements: Announcement[];
@@ -29,11 +29,14 @@ export class HomePage implements OnInit, IAnnouncementService {
     constructor(public navCtrl: NavController,
                 public http   : Http,
                 private announcementService : AnnouncementService){
-        //this.getAnnouncements();
     }
 
     ngOnInit(): void {
         //this.getAnnouncements();
+    }
+
+    ionViewWillEnter(){
+        this.getAnnouncements();
     }
 
     public getAnnouncements(): void{
@@ -48,19 +51,12 @@ export class HomePage implements OnInit, IAnnouncementService {
                     //data = element;
                 });
                 this.announcements = data;
-                console.log("tata ",data);
                 
             }
         );
     }
 
-
-    ionViewWillEnter(){
-        this.getAnnouncements();
-    }
-
-    // Allow navigation to the AddTechnology page for creating a new entry
-    addEntry(){
+    public addAnnouncement(): void {
         let lastRecord = {};
         lastRecord = _.maxBy(this.announcements, 'id'); // Return object containing the last max ID
         this.lastRecordParam = lastRecord != undefined ? lastRecord : {id : 0};
@@ -68,10 +64,16 @@ export class HomePage implements OnInit, IAnnouncementService {
     }
 
 
-    // Allow navigation to the AddTechnology page for amending an existing entry
-    // (We supply the actual record to be amended, as this method's parameter,
-    // to the AddTechnology page
-    viewEntry(param){
-        this.navCtrl.push('AddAnnouncement', param);
+    public showAnnouncements(param): void {
+        //this.navCtrl.push('AddAnnouncement', param);
+        this.navCtrl.push('AnnouncementDetail', param);
+    }
+
+    public doRefresh(refresher) {
+
+        setTimeout(() => {
+            this.getAnnouncements();
+            refresher.complete();
+        }, 1000);
     }
 }

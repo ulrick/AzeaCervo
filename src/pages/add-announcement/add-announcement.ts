@@ -1,3 +1,4 @@
+// Ctrl + Alt + D twice to comment
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ActionSheetController, ToastController, Platform, LoadingController, Loading } from 'ionic-angular';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
@@ -32,35 +33,57 @@ declare var cordova: any;
 })
 export class AddAnnouncement {
 
-  // Define FormBuilder /model properties
-  public form                   : FormGroup;
-  public announcementTitle      : any;
-  public announcementMessage    : any;
-  public announcementPhoto      : string;
-  public announcement           : Announcement;
-  // Flag to be used for checking whether we are adding/editing an entry
-  public isEdited               : boolean = false;
-  // Flag to hide the form upon successful completion of remote operation
-  public hideForm               : boolean = false;
-  // Property to help ste the page title
-  public pageTitle              : string;
-  // Property to store the recordID for when an existing entry is being edited
-  public recordID               : any     = null;
-  private baseURI               : string  = "http://www.manasse-yawo.com/azea-cervo/";
-  private targetFolder          : string  = this.baseURI+"uploads/";
-  // Destination URL
-  private uploadURL             : string  = "http://www.manasse-yawo.com/azea-cervo/upload.php";
+    // Define FormBuilder /model properties
+    public form                   : FormGroup;
+    public announcementTitle      : any;
+    public announcementMessage    : any;
+    public announcementPhoto      : string;
+    public announcement           : Announcement;
+    // Flag to be used for checking whether we are adding/editing an entry
+    public isEdited               : boolean = false;
+    // Flag to hide the form upon successful completion of remote operation
+    public hideForm               : boolean = false;
+    // Property to help ste the page title
+    public pageTitle              : string;
+    // Property to store the recordID for when an existing entry is being edited
+    public recordID               : any     = null;
+    public baseURI               : string  = "http://www.manasse-yawo.com/azea-cervo/";
+    public targetFolder          : string  = this.baseURI+"uploads/";
+    // Destination URL
+    public uploadURL             : string  = "http://www.manasse-yawo.com/azea-cervo/upload.php";
 
-  private lastImage: string = null;
-  private hideBtn : boolean = true;
-  private images: string[] = [];
-  private loading: Loading;
-  private lastRecordID : number;
-  private currentAdsID: number;
+    public lastImage: string = null;
+    public hideBtn : boolean = true;
+    public images: string[] = [];
+    public imagesToDelete: string[] = [];
+    public loading: Loading;
+    public lastRecordID : number;
+    public currentAdsID: number;
+    public isNewPhoto: boolean = false;
 
 
-  // Initialise module classes
-   constructor( 
+    // Initialise module classes
+    
+
+    /**
+     * Creates an instance of AddAnnouncement.
+     * @param {NavController} navCtrl 
+     * @param {Http} http 
+     * @param {NavParams} navParams 
+     * @param {FormBuilder} formBuilder 
+     * @param {ToastController} toastCtrl 
+     * @param {Camera} camera 
+     * @param {ActionSheetController} actionSheetCtrl 
+     * @param {Platform} platform 
+     * @param {LoadingController} loadingCtrl 
+     * @param {FilePath} filePath 
+     * @param {File} file 
+     * @param {Transfer} transfer 
+     * @param {SpinnerDialog} spinnerDialog 
+     * 
+     * @memberof AddAnnouncement
+     */
+    constructor( 
                 public navCtrl              : NavController,
                 public http                 : Http,
                 public navParams            : NavParams,
@@ -72,9 +95,9 @@ export class AddAnnouncement {
                 public loadingCtrl          : LoadingController,
                 public filePath             : FilePath, 
                 public file                 : File,
-                private transfer            : Transfer,
-                private spinnerDialog       : SpinnerDialog)
-   {
+                public transfer            : Transfer,
+                public spinnerDialog       : SpinnerDialog)
+    {
        this.announcement = {
             id: null,
             category: "",
@@ -95,11 +118,15 @@ export class AddAnnouncement {
 
         if(this.images.length == 1)
             this.hideBtn = false;
-   }
+    }
 
 
-   // Determine whether we adding or editing a record
-   // based on any supplied navigation parameters
+   /**
+    * Determine whether we adding or editing a record
+    * based on any supplied navigation parameters
+    * 
+    * @memberof AddAnnouncement
+    */
    ionViewWillEnter()
    {
        //console.log(this.navParams);
@@ -123,8 +150,8 @@ export class AddAnnouncement {
 
     // Assign the navigation retrieved data to properties
     // used as models on the page's HTML form
-    selectEntry(item){
-        let tmpImg = [];
+    selectEntry(item : Announcement) {
+    
         this.announcement.id = this.recordID        = item.id;
         this.announcement.title                     = item.title;
         this.announcement.message                   = item.message;
@@ -132,36 +159,24 @@ export class AddAnnouncement {
         this.announcement.date                      = item.date;
         this.announcement.photo                     = item.photo;
 
-    
-        this.images =  this.announcement.photo != "" ? this.splitImageString(this.announcement.photo):[];
-        /*if(tmpImg && tmpImg.length <= 2){
-            for (var i = 0; i < tmpImg.length; i++) {
-                this.images[i] = this.targetFolder + tmpImg[i];
-            }
-        }
-        else{
-            this.images = [];
-        }*/
+        this.images =  this.announcement.photo != "" ? Utils.buildPhotosPath(this.announcement.photo):[];
+
+        Utils.buildPhotosPath(item.photo).forEach(element => {
+            this.imagesToDelete.push(element);
+            //this.copyFileToLocalDir(TARGET_PHOTO_FOLDER + element, element, element);
+        });
                 
     }
 
 
-   // Save a new record that has been added to the page's HTML form
-   // Use angular's http post method to submit the record data
-   // to our remote PHP script (note the body variable we have created which
-   // supplies a variable of key with a value of create followed by the key/value pairs
-   // for the record data
-   createEntry(announcement: Announcement){
-    
-        if(this.images.length != 0){
-            announcement.photo = this.images.join();
-            for(var i=0; i<= this.images.length; i++){
-                this.uploadImage(this.images[i]);
-            }
-        }
-        else{
-            announcement.photo = "";
-        }
+    // Save a new record that has been added to the page's HTML form
+    // Use angular's http post method to submit the record data
+    // to our remote PHP script (note the body variable we have created which
+    // supplies a variable of key with a value of create followed by the key/value pairs
+    // for the record data
+    protected createEntry(announcement: Announcement) {
+
+        announcement.photo = this.images.length != 0 ? Utils.splitImages(this.images) : "";
 
         let body     : string   = "key=create&title=" + announcement.title + "&message=" + announcement.message + "&price=" + announcement.price + "&date=" + announcement.date + "&photo=" + announcement.photo,
             type     : string   = "application/x-www-form-urlencoded; charset=UTF-8",
@@ -169,22 +184,26 @@ export class AddAnnouncement {
             options  : any      = new RequestOptions({ headers: headers }),
             url      : any      = this.baseURI + "manage-data.php";
 
-        this.http.post(url, body, options)
-        .subscribe((data) =>
-        {
-            // If the request was successful notify the user
-            if(data.status === 200)
-            {
-                this.hideForm   = true;
-                this.sendNotification(`Congratulations the technology: ${announcement.title} was successfully added`);
-            }
-            // Otherwise let 'em know anyway
-            else
-            {
-                this.sendNotification('Something went wrong!');
-            }
-        });
-   }
+        new Promise(resolve=>{
+
+            this.http.post(url, body, options).subscribe((data) => {
+
+                // If the request was successful notify the user
+                if(data.status === 200) {
+
+                    if(this.images.length != 0){
+                        this.uploadImage(this.images);
+                    }
+                    this.hideForm   = true;
+                    this.sendNotification(`Congratulations the technology: ${announcement.title} was successfully added`);
+                }
+                // Otherwise let 'em know anyway
+                else {
+                    this.sendNotification('Something went wrong!');
+                }
+            });
+        })
+    }
 
 
 
@@ -193,38 +212,44 @@ export class AddAnnouncement {
     // to our remote PHP script (note the body variable we have created which
     // supplies a variable of key with a value of update followed by the key/value pairs
     // for the record data
-    updateEntry(announcement : Announcement)
-    {
-        announcement.id = this.recordID;
-        let body       : string = "key=update&title=" + announcement.title + "&message=" + announcement.message + "&price=" + announcement.price + "&date=" + announcement.date + "&recordID=" + announcement.id,
-          type       : string = "application/x-www-form-urlencoded; charset=UTF-8",
-          headers    : any     = new Headers({ 'Content-Type': type}),
-          options    : any     = new RequestOptions({ headers: headers }),
-          url        : any     = this.baseURI + "manage-data.php";
+    protected updateEntry(announcement : Announcement){
 
-      this.http.post(url, body, options)
-      .subscribe(data =>
-      {
-         // If the request was successful notify the user
-         if(data.status === 200)
-         {
-            this.hideForm  =  true;
-            this.sendNotification(`Congratulations the technology: ${announcement.title} was successfully updated`);
-         }
-         // Otherwise let 'em know anyway
-         else
-         {
-            this.sendNotification('Something went wrong!');
-         }
-      });
+        announcement.id = this.recordID;
+        announcement.photo = this.images.length != 0 ? Utils.splitImages(this.images) : "";
+        let body       : string  = "key=update&title=" + announcement.title + "&message=" + announcement.message + "&price=" + announcement.price + "&date=" + announcement.date + "&recordID=" + announcement.id + "&photo=" + announcement.photo,
+            type       : string  = "application/x-www-form-urlencoded; charset=UTF-8",
+            headers    : any     = new Headers({ 'Content-Type': type}),
+            options    : any     = new RequestOptions({ headers: headers }),
+            url        : any     = this.baseURI + "manage-data.php";
+
+        new Promise(resolve=>{
+            this.http.post(url, body, options).subscribe(data => {
+                // If the request was successful notify the user
+                if(data.status === 200) {
+
+                    if(this.images.length != 0){
+                        this.uploadImage(this.images);
+                    }
+                    /*if(this.imagesToDelete.toString !== this.images.toString){
+                        this.deletePhotoFromServer(this.imagesToDelete);
+                        this.uploadImage(this.images);
+                    }*/
+                    this.hideForm  =  true;
+                    this.sendNotification(`Congratulations the technology: ${announcement.title} was successfully updated`);
+                }
+                // Otherwise let 'em know anyway
+                else {
+                    this.sendNotification('Something went wrong!');
+                }
+            });
+        })
    }
 
 
     // Handle data submitted from the page's HTML form
     // Determine whether we are adding a new record or amending an
     // existing record
-    saveEntry()
-    {
+    public saveEntry() {
         
         this.announcement = this.form.value;
         this.announcement.date = Utils.getDateToRegister();
@@ -239,41 +264,48 @@ export class AddAnnouncement {
     }
 
 
-   // Remove an existing record that has been selected in the page's HTML form
-   // Use angular's http post method to submit the record data
-   // to our remote PHP script (note the body variable we have created which
-   // supplies a variable of key with a value of delete followed by the key/value pairs
-   // for the record ID we want to remove from the remote database
-   deleteEntry()
-   {
-      let title       : string = this.form.controls["title"].value,
-          body       : string    = "key=delete&recordID=" + this.recordID,
-          type       : string = "application/x-www-form-urlencoded; charset=UTF-8",
-          headers    : any    = new Headers({ 'Content-Type': type}),
-          options    : any    = new RequestOptions({ headers: headers }),
-          url        : any    = this.baseURI + "manage-data.php";
+    // Remove an existing record that has been selected in the page's HTML form
+    // Use angular's http post method to submit the record data
+    // to our remote PHP script (note the body variable we have created which
+    // supplies a variable of key with a value of delete followed by the key/value pairs
+    // for the record ID we want to remove from the remote database
+    deleteEntry() {
 
-      this.http.post(url, body, options)
-      .subscribe(data =>
-      {
-         // If the request was successful notify the user
-         if(data.status === 200)
-         {
-            this.hideForm     = true;
-            this.sendNotification(`Congratulations the technology: ${title} was successfully deleted`);
-         }
-         // Otherwise let 'em know anyway
-         else
-         {
-            this.sendNotification('Something went wrong!');
-         }
-      });
-   }
+        let title       : string = this.form.controls["title"].value,
+            body       : string    = "key=delete&recordID=" + this.recordID,
+            type       : string = "application/x-www-form-urlencoded; charset=UTF-8",
+            headers    : any    = new Headers({ 'Content-Type': type}),
+            options    : any    = new RequestOptions({ headers: headers }),
+            url        : any    = this.baseURI + "manage-data.php";
+        
+        //this.deletePhotoFromServer(this.images).then(imageToDel=>{
+            this.http.post(url, body, options)
+            .subscribe(data => {
+                // If the request was successful notify the user
+                if(data.status === 200)
+                {
+                    this.hideForm     = true;
+                    this.sendNotification(`Congratulations the technology: ${title} was successfully deleted`);
+                }
+                // Otherwise let 'em know anyway
+                else
+                {
+                    this.sendNotification('Something went wrong!');
+                }
+            });
+
+            if(this.images && this.images.length > 0){
+                this.images.forEach(elt=>{
+                    this.deletePhoto(elt);
+                })
+            }
+        //});
+      
+    }
 
 
     // Clear values in the page's HTML form fields
-    resetFields() : void
-    {
+    protected resetFields() : void {
         this.announcement.title      = "";
         this.announcement.message    = "";
         this.announcement.photo      = "";
@@ -283,7 +315,7 @@ export class AddAnnouncement {
 
     // Manage notifying the user of the outcome
     // of remote operations
-    private sendNotification(message)  : void {
+    protected sendNotification(message)  : void {
 
         let notification = this.toastCtrl.create({
             message       : message,
@@ -319,16 +351,16 @@ export class AddAnnouncement {
         actionSheet.present();
     }
 
-    public takePicture(sourceType) {
+    protected takePicture(sourceType) {
         // Create options for the Camera Dialog
         var options = {
-            quality: 50,
+            quality: 100,
             sourceType: sourceType,
             saveToPhotoAlbum: false,
-            correctOrientation: false,
+            correctOrientation: true,
             allowEdit: true,
-            targetWidth: 250,
-            targetHeight: 250
+            targetWidth: 300,
+            targetHeight: 300
         };
 
         // Get the data of an image
@@ -346,6 +378,7 @@ export class AddAnnouncement {
                 var correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
                 this.copyFileToLocalDir(correctPath, currentName, this.createFileName());
             }
+            this.isNewPhoto = true;
         }, (err) => {
             this.sendNotification('Error while selecting image.');
         });
@@ -353,7 +386,7 @@ export class AddAnnouncement {
 
 
     // Create a new name for the image
-    private createFileName() {
+    protected createFileName() {
         var d = new Date(),
         n = d.getTime(),
         //imgName = "photo_annonce_"+this.currentAdsID+"_", 
@@ -362,7 +395,7 @@ export class AddAnnouncement {
     }
     
     // Copy the image to a local folder
-    private copyFileToLocalDir(namePath, currentName, newFileName) {
+    protected copyFileToLocalDir(namePath, currentName, newFileName) {
         this.file.copyFile(namePath, currentName, cordova.file.dataDirectory, newFileName).then(success => {
             this.lastImage = newFileName;
             this.images.push(this.lastImage);
@@ -370,60 +403,122 @@ export class AddAnnouncement {
         }, error => {
             this.sendNotification('Error while storing file.');
         });
-    }
- 
+    } 
     
+
     // Always get the accurate path to your apps folder
-    public pathForImage(img) {
+    public pathForImage(img: string): string {
         
-        if(this.isEdited){
-            //this.images = [];
-            this.lastImage = img;
-            this.hideBtn = this.images.length == 1 ? false : true;
-            return img !== null ? TARGET_PHOTO_FOLDER + img : '';
-            
+        if(img != "") {
+
+            if(this.isEdited ) {
+                this.lastImage = img;
+                this.hideBtn = this.images.length == 1 ? false : true;
+
+                /*if(this.images == null || this.images.length == 0){
+                    return cordova.file.dataDirectory + img;
+                }*/
+
+                return TARGET_PHOTO_FOLDER + img;
+
+                //this.downloadImage(img);
+
+                //return img !== null ? cordova.file.dataDirectory + img : '';
+                /*let del = [];
+                if(this.imagesToDelete.length != 0){
+                    
+                }
+                else{
+                    return img !== null ? cordova.file.dataDirectory + img : '';
+                }     */       
+            }
+        
+            return cordova.file.dataDirectory + img;
         }
         else{
-           return img !== null ? cordova.file.dataDirectory + img : '';
+            return '';
         }
     }
 
+    
 
-    public uploadImage(img : string) {
+    protected uploadImage(images : string[]) {
         
-        // File for Upload
-        var targetPath = this.pathForImage(img);
-        
-        // File name only
-        var filename = img;
-        
-        var options = {
-            fileKey: "file",
-            fileName: filename,
-            chunkedMode: false,
-            mimeType: "multipart/form-data",
-            params : {'fileName': filename}
-        };
-        
-        this.loading = this.loadingCtrl.create({
-            content: 'Uploading...',
-        });
-        this.loading.present();
-        
-        // Use the FileTransfer to upload the image
-        const fileTransfer: TransferObject = this.transfer.create();
-        fileTransfer.upload(targetPath, this.uploadURL, options).then(data => {
-            this.loading.dismissAll()
-            //this.sendNotification('Image succesful uploaded.');
-        }, err => {
-            this.loading.dismissAll()
-            this.sendNotification('Error while uploading file.');
-        });
+        images.forEach((element)=>{
+            // File for Upload
+            var targetPath = this.pathForImage(element);
+            
+            // File name only
+            var filename = element;
+            
+            var options = {
+                fileKey: "file",
+                fileName: filename,
+                chunkedMode: false,
+                mimeType: "multipart/form-data",
+                params : {'fileName': filename}
+            };
+            
+            this.loading = this.loadingCtrl.create({
+                content: 'Uploading...',
+            });
+            this.loading.present();
+            
+            // Use the FileTransfer to upload the image
+            const fileTransfer: TransferObject = this.transfer.create();
+            fileTransfer.upload(targetPath, this.uploadURL, options).then(data => {
+                this.loading.dismissAll()
+                //this.sendNotification('Image succesful uploaded.');
+            }, err => {
+                this.loading.dismissAll()
+                this.sendNotification('Error while uploading file.');
+            });
+        })
     }
 
-    public deletePhoto(img){
 
-        var index = this.images.indexOf(img);
+    protected downloadImage(img : string){
+
+        if(img != ""){
+            
+            //this.images.forEach(element => {
+
+                var targetPath = this.file.dataDirectory + img;
+
+                const fileTransfer: TransferObject = this.transfer.create();
+                fileTransfer.download(TARGET_PHOTO_FOLDER, targetPath , true).then(data =>{
+                    console.log('download complete: ' + data.toURL());
+                }, err =>{
+                    this.sendNotification('Error while downloading file.');
+                });
+            //});
+        }
+    }
+    
+
+    /**
+     * Deletes photos from form
+     * 
+     * @param {string} img 
+     * 
+     * @memberof AddAnnouncement
+     */
+    public deletePhoto(img : string) : void{
+        
+        let imgToDel = [];
+        let index = this.images.indexOf(img);
+
+        if(this.isEdited){
+            if(this.imagesToDelete!=null && this.imagesToDelete.length !=0){
+                this.imagesToDelete.forEach(element => {
+                    if(element == img) 
+                        imgToDel.push(img);
+                });
+                //this.deletePhotoFromServer(imgToDel);
+            }
+            
+        }
+        
         if (index > -1) {
             this.images.splice(index, 1);
         }
@@ -432,25 +527,49 @@ export class AddAnnouncement {
             this.lastImage = null;
         
         this.hideBtn = this.images.length == 1 ? false : true;
-            
     }
 
 
     /**
-     * Split images string get from database into an array if there are many.
-     * @param img
-     * @return {string[]} Image absolute path
+     * Deletes images from server upload folder
+     * 
+     * @protected
+     * @param {string[]} img 
+     * @returns {Promise<string>} 
+     * 
+     * @memberof AddAnnouncement
      */
-    private splitImageString(img: string) : string[]{
-        let images : string[] = [];
-        if(img.indexOf(",") != -1){
-            images = img.split(",");
-        } 
-        else{
-            images[0] = img;
-        }
+    protected deletePhotoFromServer(img : string[]) : Promise<string>{
 
-        return images;
+        //let img
+        let photoToDelete = Utils.splitImages(img);
+        return new Promise(resolve =>{
+
+            let
+            body       : string    = "key=deletephotos&photos="+photoToDelete,
+            type       : string = "application/x-www-form-urlencoded; charset=UTF-8",
+            headers    : any    = new Headers({ 'Content-Type': type}),
+            options    : any    = new RequestOptions({ headers: headers }),
+            url        : any    = this.baseURI + "manage-data.php";
+
+            this.http.post(url, body, options)
+            .subscribe(data => {
+                // If the request was successful notify the user
+                if(data.status === 200)
+                {
+                    resolve(photoToDelete);
+                }
+                // Otherwise let 'em know anyway
+                else
+                {
+                    this.sendNotification('Something went wrong!');
+                }
+            });
+        })
+
+        
     }
+    
+      
 
 }

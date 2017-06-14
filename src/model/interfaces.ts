@@ -22,4 +22,32 @@ export interface IAnnouncement {
 export interface IAnnouncementService {
 
     getAnnouncements() : void;
+}
+
+
+/**
+ *  Home page interface
+ * 
+ * @export
+ * @interface IHomePage
+ */
+export interface IHomePage {
+
+    /**
+     * Show the list of announcements
+     * 
+     * @param {*} param 
+     * 
+     * @memberof IHomePage
+     */
+    showAnnouncements(param : any) : void;
+
+
+    /**
+     * Allow navigation to the AddAnnouncement page for creating a new announcement
+     * 
+     * 
+     * @memberof IHomePage
+     */
+    addAnnouncement(): void;
 } 

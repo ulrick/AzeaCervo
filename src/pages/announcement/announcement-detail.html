@@ -1,11 +1,71 @@
 
-<announcement-detail [announcement]="selectedAnnouncement">
-    <div *ngIf="announcement">
-        <h2>{{announcement.title}} details!</h2>
-        <div><label>id: </label>{{announcement.id}}</div>
-        <div>
-            <label>name: </label>
-            <input [(ngModel)]="announcement.title" placeholder="name"/>
-        </div>
+<!-- https://devdactic.com/ionic-2-images/-->
+<ion-header>
+   <ion-navbar>
+      <ion-title>{{ pageTitle }}</ion-title>
+   </ion-navbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-fab top right edge>
+    <button ion-fab mini (click)="editAnnouncement({ record: announcement })"><ion-icon name="create"></ion-icon></button>
+  </ion-fab>
+
+  <ion-card>
+    <ion-card-header>
+      Nom du publicateur
+    </ion-card-header>
+
+    <div id="photo-content">
+      <ion-grid>
+        <ion-row *ngIf="images?.length == 2" class="photo-area">
+          <ion-col *ngFor="let img of images" col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6 text-center>
+            <div class="img-content">
+              <img src="{{pathForImage(img)}}" [hidden]="img === null" />
+            </div>
+          </ion-col>
+        </ion-row>
+
+        <ion-row *ngIf="images?.length == 1" class="photo-area">
+          <ion-col *ngFor="let img of images" col-12 padding text-center>
+            <div class="img-content">
+              <img src="{{pathForImage(img)}}" [hidden]="img === null" />
+            </div>
+          </ion-col>
+        </ion-row>
+
+      </ion-grid>
     </div>
-  </announcement-detail>
+
+    <ion-card-content>
+      <ion-card-title>
+        {{announcement.title}}
+      </ion-card-title>
+      <p>
+        {{announcement.message}}
+      </p>
+    </ion-card-content>
+
+    <ion-row>
+      <ion-col>
+        <button ion-button icon-left clear small>
+          <ion-icon name="thumbs-up"></ion-icon>
+          <div>Contacter</div>
+        </button>
+      </ion-col>
+      <ion-col>
+        <button ion-button icon-left clear small>
+          <ion-icon name="text"></ion-icon>
+          <div>localisation</div>
+        </button>
+      </ion-col>
+      <ion-col center text-center>
+        <ion-note>
+          {{announcement.price}}
+        </ion-note>
+      </ion-col>
+    </ion-row>
+  </ion-card>
+
+</ion-content>

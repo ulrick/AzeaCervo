@@ -11,7 +11,6 @@ export class Utils {
 
         let imgPath: string = null;
         if(img !== ""){
-
             if(img.indexOf(",") != -1){
                 imgPath = TARGET_PHOTO_FOLDER + img.split(',')[0]; // We get only the first photo to display
             }
@@ -22,18 +21,25 @@ export class Utils {
         /*else{
             imgPath = null;
         }*/
-
         return imgPath;
     }
 
 
     /**
-     * Render the absolute path of each announcement image.
+     * Converts images string get from database into an array of images
      * @param img
-     * @return {string} Image absolute path
+     * @return {string[]} Image absolute path
      */
-    public static buildPhotosPath(img: string): string[] {
-        return []
+    public static buildPhotosPath(img: string) : string[]{
+        let images : string[] = [];
+        if(img.indexOf(",") != -1){
+            images = img.split(",");
+        } 
+        else{
+            images[0] = img;
+        }
+
+        return images;
     }
 
 
@@ -47,4 +53,24 @@ export class Utils {
       
         return parts;
 	}
+
+
+
+    /**
+     * Converts images array to a string separated by a comma 
+     * 
+     * @static
+     * @param {string[]} images 
+     * @returns {string} 
+     * 
+     * @memberof Utils
+     */
+    public static splitImages(images : string[]) : string{
+        let photo : string = "";
+        if(images != null || images != undefined || images.length != 0) {
+            return images.join();
+        }
+
+        return photo;
+    }
 }

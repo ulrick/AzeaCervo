@@ -25,10 +25,10 @@ export class AnnouncementService {
 
   public getAnnouncements(): Promise<Announcement[]>{
 
-    /*if(this.announcements){
+    if(this.announcements){
       // Already loaded data?
-      return Promise.resolve(this.announcements);
-    }*/
+      //return Promise.resolve(this.announcements);
+    }
     this.spinnerDialog.show("", "chargements...");
     return new Promise(resolve => {
       // We're using Angular HTTP provider to request the data,
@@ -38,7 +38,7 @@ export class AnnouncementService {
         .map(res => res.json())
         .subscribe(data =>{
           this.announcements = data;
-          resolve(this.announcements);
+          //resolve(this.announcements);
           // Simulate latency with 2 second delay
           
           setTimeout(() => {

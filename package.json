@@ -1,7 +1,7 @@
 {
   "name": "azea-cervo",
-  "author": "Ionic Framework",
-  "homepage": "http://ionicframework.com/",
+  "author": "MANASSE Yawo Fofonè Ulrick",
+  "homepage": "http://manasse-yawo.com/",
   "private": true,
   "scripts": {
     "clean": "ionic-app-scripts clean",

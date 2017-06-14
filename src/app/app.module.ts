@@ -30,9 +30,7 @@ import { AnnouncementService } from "../providers/announcement-service";
     ListPage,
     Offers,
     Requests,
-    AnnouncementComponent,
-    AnnouncementDetail,
-    //AddAnnouncement
+    AnnouncementComponent
   ],
   imports: [
     BrowserModule,
@@ -55,9 +53,7 @@ import { AnnouncementService } from "../providers/announcement-service";
     ListPage,
     Offers,
     Requests,
-    AnnouncementComponent,
-    AnnouncementDetail,
-    //AddAnnouncement
+    AnnouncementComponent
   ],
   providers: [
     StatusBar,
