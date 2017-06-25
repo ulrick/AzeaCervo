@@ -13,9 +13,9 @@
   </ion-refresher>
 
   <ion-list>
-    <ion-item *ngFor="let item of announcements" (click)="showAnnouncements({ record: item })">
+    <ion-item *ngFor="let item of announcements" (click)="showAnnouncementDetail({ record: item })">
       <ion-avatar item-left>
-        <img src="{{ item.imgThumb }}" [hidden]="item.photo == null">
+        <img src="{{ item.imgThumb }}" [hidden]="item.photo == '' ">
       </ion-avatar>
       <h2> {{ item.title }} </h2>
       <p> {{ item.message }}</p>

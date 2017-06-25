@@ -21,7 +21,10 @@ export interface IAnnouncement {
 
 export interface IAnnouncementService {
 
-    getAnnouncements() : void;
+    create(announcement : Announcement) : Promise<Announcement>;
+    read() : Promise<Announcement[]>;
+    update(announcement : Announcement) : Promise<Announcement>;
+    delete(announcement : Announcement) : Promise<Announcement>;
 }
 
 
@@ -40,7 +43,7 @@ export interface IHomePage {
      * 
      * @memberof IHomePage
      */
-    showAnnouncements(param : any) : void;
+    showAnnouncementDetail(param : any) : void;
 
 
     /**

@@ -14,7 +14,7 @@ import { Announcement } from "../announcement/announcement";
 import 'rxjs/add/operator/map';
 import { AnnouncementService } from "../../providers/announcement-service";
 import { Utils } from "../../model/utils";
-import { TARGET_PHOTO_FOLDER } from "../../model/consts";
+import { TARGET_PHOTO_FOLDER, BASE_URI } from "../../model/consts";
 
 
 declare var cordova: any;
@@ -29,7 +29,8 @@ declare var cordova: any;
 @IonicPage()
 @Component({
   selector: 'page-add-announcement',
-  templateUrl: 'add-announcement.html'
+  templateUrl: 'add-announcement.html',
+  providers: [AnnouncementService]
 })
 export class AddAnnouncement {
 
@@ -47,8 +48,7 @@ export class AddAnnouncement {
     public pageTitle              : string;
     // Property to store the recordID for when an existing entry is being edited
     public recordID               : any     = null;
-    public baseURI               : string  = "http://www.manasse-yawo.com/azea-cervo/";
-    public targetFolder          : string  = this.baseURI+"uploads/";
+    
     // Destination URL
     public uploadURL             : string  = "http://www.manasse-yawo.com/azea-cervo/upload.php";
 
@@ -96,7 +96,8 @@ export class AddAnnouncement {
                 public filePath             : FilePath, 
                 public file                 : File,
                 public transfer            : Transfer,
-                public spinnerDialog       : SpinnerDialog)
+                public spinnerDialog       : SpinnerDialog,
+                protected announcementService : AnnouncementService)
     {
        this.announcement = {
             id: null,
@@ -169,81 +170,77 @@ export class AddAnnouncement {
     }
 
 
-    // Save a new record that has been added to the page's HTML form
-    // Use angular's http post method to submit the record data
-    // to our remote PHP script (note the body variable we have created which
-    // supplies a variable of key with a value of create followed by the key/value pairs
-    // for the record data
-    protected createEntry(announcement: Announcement) {
+    /**
+     *  Save a new announcement that have been added in the form
+        Use angular's http post method to submit the record data to our remote PHP server.
+     * 
+     * @protected
+     * @param {Announcement} announcement 
+     * @returns 
+     * 
+     * @memberof AddAnnouncement
+     */
+    protected addAnnouncement(announcement: Announcement) {
+
+        if (!announcement) { return; }
 
         announcement.photo = this.images.length != 0 ? Utils.splitImages(this.images) : "";
-
-        let body     : string   = "key=create&title=" + announcement.title + "&message=" + announcement.message + "&price=" + announcement.price + "&date=" + announcement.date + "&photo=" + announcement.photo,
-            type     : string   = "application/x-www-form-urlencoded; charset=UTF-8",
-            headers  : any      = new Headers({ 'Content-Type': type}),
-            options  : any      = new RequestOptions({ headers: headers }),
-            url      : any      = this.baseURI + "manage-data.php";
-
-        new Promise(resolve=>{
-
-            this.http.post(url, body, options).subscribe((data) => {
-
-                // If the request was successful notify the user
-                if(data.status === 200) {
-
-                    if(this.images.length != 0){
-                        this.uploadImage(this.images);
-                    }
-                    this.hideForm   = true;
-                    this.sendNotification(`Congratulations the technology: ${announcement.title} was successfully added`);
-                }
-                // Otherwise let 'em know anyway
-                else {
-                    this.sendNotification('Something went wrong!');
-                }
-            });
+        this.announcementService.create(announcement).then(add => {
+            if(this.images.length != 0){
+                this.uploadImage(this.images);
+            }
+            this.hideForm   = true;
+            this.sendNotification(`Congratulations the announcement: ${announcement.title} was successfully added`);
         })
     }
 
-
-
-    // Update an existing record that has been edited in the page's HTML form
-    // Use angular's http post method to submit the record data
-    // to our remote PHP script (note the body variable we have created which
-    // supplies a variable of key with a value of update followed by the key/value pairs
-    // for the record data
-    protected updateEntry(announcement : Announcement){
+    /**
+     * Update an existing announcement that has been edited in form page
+     * 
+     * @protected
+     * @param {Announcement} announcement 
+     * 
+     * @memberof AddAnnouncement
+     */
+    protected modifyAnnouncement(announcement: Announcement) : void {
 
         announcement.id = this.recordID;
         announcement.photo = this.images.length != 0 ? Utils.splitImages(this.images) : "";
-        let body       : string  = "key=update&title=" + announcement.title + "&message=" + announcement.message + "&price=" + announcement.price + "&date=" + announcement.date + "&recordID=" + announcement.id + "&photo=" + announcement.photo,
-            type       : string  = "application/x-www-form-urlencoded; charset=UTF-8",
-            headers    : any     = new Headers({ 'Content-Type': type}),
-            options    : any     = new RequestOptions({ headers: headers }),
-            url        : any     = this.baseURI + "manage-data.php";
-
-        new Promise(resolve=>{
-            this.http.post(url, body, options).subscribe(data => {
-                // If the request was successful notify the user
-                if(data.status === 200) {
-
-                    if(this.images.length != 0){
-                        this.uploadImage(this.images);
-                    }
-                    /*if(this.imagesToDelete.toString !== this.images.toString){
-                        this.deletePhotoFromServer(this.imagesToDelete);
-                        this.uploadImage(this.images);
-                    }*/
-                    this.hideForm  =  true;
-                    this.sendNotification(`Congratulations the technology: ${announcement.title} was successfully updated`);
-                }
-                // Otherwise let 'em know anyway
-                else {
-                    this.sendNotification('Something went wrong!');
-                }
-            });
+        this.announcementService.update(announcement).then(add => {
+            if(this.images.length != 0){
+                this.uploadImage(this.images);
+            }
+            /*if(this.imagesToDelete.toString !== this.images.toString){
+                this.deletePhotoFromServer(this.imagesToDelete);
+                this.uploadImage(this.images);
+            }*/
+            this.hideForm  =  true;
+            this.sendNotification(`Congratulations the technology: ${announcement.title} was successfully updated`);
         })
-   }
+    }
+
+    /**
+     * Remove announcement and related photo from server
+     * 
+     * @param {Announcement} announcement 
+     * 
+     * @memberof AddAnnouncement
+     */
+    public deleteAnnouncement(announcement: Announcement) : void {
+        announcement.id = this.recordID;
+        this.announcementService.delete(announcement).then(add => {
+
+            let images = Utils.buildPhotosPath(announcement.photo);
+            if(images && images.length > 0){
+                images.forEach(elt=>{
+                    this.deletePhoto(elt);
+                });
+                this.deletePhotoFromServer(images);
+            }
+            this.hideForm     = true;
+            this.sendNotification(`Congratulations the technology: ${announcement.title} was successfully deleted`);
+        });        
+    }
 
 
     // Handle data submitted from the page's HTML form
@@ -255,52 +252,11 @@ export class AddAnnouncement {
         this.announcement.date = Utils.getDateToRegister();
 
         if(this.isEdited){
-            //console.log(this.announcement);
-            this.updateEntry(this.announcement);
+            this.modifyAnnouncement(this.announcement);
         }
         else{
-            this.createEntry(this.announcement);
+            this.addAnnouncement(this.announcement);
         }
-    }
-
-
-    // Remove an existing record that has been selected in the page's HTML form
-    // Use angular's http post method to submit the record data
-    // to our remote PHP script (note the body variable we have created which
-    // supplies a variable of key with a value of delete followed by the key/value pairs
-    // for the record ID we want to remove from the remote database
-    deleteEntry() {
-
-        let title       : string = this.form.controls["title"].value,
-            body       : string    = "key=delete&recordID=" + this.recordID,
-            type       : string = "application/x-www-form-urlencoded; charset=UTF-8",
-            headers    : any    = new Headers({ 'Content-Type': type}),
-            options    : any    = new RequestOptions({ headers: headers }),
-            url        : any    = this.baseURI + "manage-data.php";
-        
-        //this.deletePhotoFromServer(this.images).then(imageToDel=>{
-            this.http.post(url, body, options)
-            .subscribe(data => {
-                // If the request was successful notify the user
-                if(data.status === 200)
-                {
-                    this.hideForm     = true;
-                    this.sendNotification(`Congratulations the technology: ${title} was successfully deleted`);
-                }
-                // Otherwise let 'em know anyway
-                else
-                {
-                    this.sendNotification('Something went wrong!');
-                }
-            });
-
-            if(this.images && this.images.length > 0){
-                this.images.forEach(elt=>{
-                    this.deletePhoto(elt);
-                })
-            }
-        //});
-      
     }
 
 
@@ -539,7 +495,7 @@ export class AddAnnouncement {
      * 
      * @memberof AddAnnouncement
      */
-    protected deletePhotoFromServer(img : string[]) : Promise<string>{
+    protected deletePhotoFromServer(img : string[]) : Promise<string> {
 
         //let img
         let photoToDelete = Utils.splitImages(img);
@@ -550,7 +506,7 @@ export class AddAnnouncement {
             type       : string = "application/x-www-form-urlencoded; charset=UTF-8",
             headers    : any    = new Headers({ 'Content-Type': type}),
             options    : any    = new RequestOptions({ headers: headers }),
-            url        : any    = this.baseURI + "manage-data.php";
+            url        : any    = BASE_URI + "/manage-data.php";
 
             this.http.post(url, body, options)
             .subscribe(data => {
@@ -565,11 +521,7 @@ export class AddAnnouncement {
                     this.sendNotification('Something went wrong!');
                 }
             });
-        })
-
-        
+        })    
     }
-    
-      
 
 }

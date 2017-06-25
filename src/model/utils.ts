@@ -1,6 +1,9 @@
 import { TARGET_PHOTO_FOLDER } from "./consts";
+import { File } from '@ionic-native/file';
 
 export class Utils {
+
+    static file: File;
 
     /**
      * Render the absolute path according of the first announcement image.
@@ -9,18 +12,15 @@ export class Utils {
      */
     public static buildPhotoPathThumb(img: string): string {
 
-        let imgPath: string = null;
+        let imgPath: string = "";
         if(img !== ""){
             if(img.indexOf(",") != -1){
-                imgPath = TARGET_PHOTO_FOLDER + img.split(',')[0]; // We get only the first photo to display
+                imgPath = TARGET_PHOTO_FOLDER + img.split(',')[0]; // We get only the first photo to be displayed
             }
             else{
                 imgPath = TARGET_PHOTO_FOLDER + img;
             }
         }
-        /*else{
-            imgPath = null;
-        }*/
         return imgPath;
     }
 
@@ -72,5 +72,25 @@ export class Utils {
         }
 
         return photo;
+    }
+
+
+    /**
+     * Check if image is present in the server folder
+     * 
+     * @static
+     * @param {string} img 
+     * @returns {string} 
+     * 
+     * @memberof Utils
+     */
+    public static findFileOnServer(img : string) : string{
+        let file = img;
+        if(img) {
+            this.file.checkFile(TARGET_PHOTO_FOLDER, img).then(exist=>{
+                file = exist? img : null;
+            });
+        }
+        return file;
     }
 }

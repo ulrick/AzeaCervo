@@ -48,10 +48,11 @@ export class AnnouncementDetail extends AddAnnouncement {
                 public filePath             : FilePath, 
                 public file                 : File,
                 public transfer             : Transfer,
-                public spinnerDialog        : SpinnerDialog
+                public spinnerDialog        : SpinnerDialog,
+                protected announcementService : AnnouncementService
           )
     {
-      super( navCtrl, http, navParams, formBuilder, toastCtrl, camera, actionSheetCtrl, platform, loadingCtrl, filePath, file, transfer, spinnerDialog );
+      super( navCtrl, http, navParams, formBuilder, toastCtrl, camera, actionSheetCtrl, platform, loadingCtrl, filePath, file, transfer, spinnerDialog, announcementService );
     }
 
     public editAnnouncement(announcement): void {

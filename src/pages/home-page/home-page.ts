@@ -19,7 +19,7 @@ import { Utils } from "../../model/utils";
   templateUrl: 'home-page.html',
   providers: [AnnouncementService]
 })
-export class HomePage implements OnInit, IAnnouncementService, IHomePage {
+export class HomePage implements OnInit, IHomePage {
 
     private lastRecordParam: any;
     private announcements: Announcement[];
@@ -39,19 +39,15 @@ export class HomePage implements OnInit, IAnnouncementService, IHomePage {
         this.getAnnouncements();
     }
 
-    public getAnnouncements(): void{
-        this.announcementService.getAnnouncements().then(
-            data => {
-
+    public getAnnouncements(): void {
+      
+        this.announcementService.read().then(
+            data => {       
                 data.forEach(element => {
-                    
-                    let photoTemp = Utils.buildPhotoPathThumb(element.photo);
-                    element.imgThumb = photoTemp;
-                    //this.adsTemp.thumbnail = photoTemp;
-                    //data = element;
+                    element.imgThumb = Utils.buildPhotoPathThumb(element.photo);
                 });
-                this.announcements = data;
                 
+                this.announcements = data;
             }
         );
     }
@@ -64,8 +60,7 @@ export class HomePage implements OnInit, IAnnouncementService, IHomePage {
     }
 
 
-    public showAnnouncements(param): void {
-        //this.navCtrl.push('AddAnnouncement', param);
+    public showAnnouncementDetail(param): void {
         this.navCtrl.push('AnnouncementDetail', param);
     }
 
