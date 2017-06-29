@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ModalController, Tabs, NavController, NavParams } from "ionic-angular";
+import { ModalController, Tabs, NavController, NavParams, ToastController } from "ionic-angular";
 import { Http } from '@angular/http';
 import _ from "lodash";
 
@@ -12,15 +12,18 @@ import { AnnouncementService } from "../../providers/announcement-service";
 import { IAnnouncementService, IHomePage } from "../../model/interfaces";
 import { TARGET_PHOTO_FOLDER } from "../../model/consts";
 import { Utils } from "../../model/utils";
+import { NetworkManager } from "../../providers/network-manager";
+import { SpinnerDialog } from "@ionic-native/spinner-dialog";
 
 
 @Component({
   selector: 'home-page',
   templateUrl: 'home-page.html',
-  providers: [AnnouncementService]
+  providers: [AnnouncementService, NetworkManager]
 })
 export class HomePage implements OnInit, IHomePage {
-
+    
+    private announcementsBackup: Announcement[];
     private lastRecordParam: any;
     private announcements: Announcement[];
     private ads = {};
@@ -28,19 +31,31 @@ export class HomePage implements OnInit, IHomePage {
 
     constructor(public navCtrl: NavController,
                 public http   : Http,
-                private announcementService : AnnouncementService){
+                private announcementService : AnnouncementService,
+                private network : NetworkManager,
+                private spinnerDialog : SpinnerDialog) {
     }
 
     ngOnInit(): void {
         //this.getAnnouncements();
     }
 
-    ionViewWillEnter(){
+    ionViewDidEnter(){
+        this.network.onConnect();
+
+        if(this.announcements.length == 0){
+            this.getAnnouncements();
+        }
+        this.network.onDisconnect();
+        //this.network.onChange();
+    }
+
+    ionViewWillEnter() {
         this.getAnnouncements();
     }
 
     public getAnnouncements(): void {
-      
+      if(this.network.isConnected()){
         this.announcementService.read().then(
             data => {       
                 data.forEach(element => {
@@ -48,8 +63,23 @@ export class HomePage implements OnInit, IHomePage {
                 });
                 
                 this.announcements = data;
-            }
-        );
+                this.announcementsBackup = data;
+            });
+      }
+      else{
+        this.offlineGetAnnouncements();
+      }
+    }
+
+    private offlineGetAnnouncements(){
+
+        if(this.announcementsBackup.length  > 0){
+                this.announcements = this.announcementsBackup;
+                this.network.onDisconnect();
+        }
+        else{
+            this.network.onDisconnect();
+        }
     }
 
     public addAnnouncement(): void {

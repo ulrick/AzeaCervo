@@ -8,6 +8,7 @@ import { Announcement } from "../pages/announcement/announcement";
 import { BASE_URI } from "../model/consts";
 import { SpinnerDialog } from "@ionic-native/spinner-dialog";
 import { IAnnouncementService } from "../model/interfaces";
+import { ToastController } from "ionic-angular";
 
 /*
   Generated class for the AnnouncementService provider.
@@ -22,7 +23,7 @@ export class AnnouncementService implements IAnnouncementService{
   //private dataUrl = BASE_URI + "/retrieve-data.php";
   private headers = new Headers({'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'});
 
-  constructor(public http: Http, private spinnerDialog : SpinnerDialog) {
+  constructor(public http: Http, private spinnerDialog : SpinnerDialog, private toastCtrl: ToastController) {
   }
 
 
@@ -73,20 +74,21 @@ export class AnnouncementService implements IAnnouncementService{
    */
   public read(): Promise<Announcement[]> {
 
-    this.spinnerDialog.show("", "chargements...");
+    this.spinnerDialog.show("", "Chargements des données...");
     return new Promise(resolve => {
-      
       this.http.get(BASE_URI + "/retrieve-data.php")
         .map(res => res.json())
         .subscribe(data =>{
-          this.announcements = data; 
+          this.announcements = data;
           setTimeout(() => {
             resolve(this.announcements);
-          }, 1000);
-          this.spinnerDialog.hide();
+            this.spinnerDialog.hide();
+          }, 2000);
         });
+    }).catch(error => {
+      this.handleError("Une erreur s'est produite. Vérifier la connexion!");
+      this.spinnerDialog.hide();
     });
-    
   }
 
   /**
@@ -109,8 +111,14 @@ export class AnnouncementService implements IAnnouncementService{
   }
 
 
-  private handleError(error: any): Promise<any> {
-    console.error('An error occurred', error); // for demo purposes only
+  private handleError(error: any = "Une erreur est survenue!"): Promise<any> {
+    let notification = this.toastCtrl.create({
+            message       : error,
+            duration      : 3000,
+            position: 'bottom'
+        });
+        notification.present();
+    console.error('An error occurred', error);
     return Promise.reject(error.message || error);
   }
 
