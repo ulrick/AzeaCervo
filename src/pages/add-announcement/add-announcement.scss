@@ -49,7 +49,7 @@ page-add-announcement {
         color : gray;
     }
 
-    .text-input-md::placeholder { /* Chrome/Opera/Safari */
+    .text-input-md::placeholder, .select::placeholder { /* Chrome/Opera/Safari */
         color: #FF9800;
         font-size : 0.7em;
         font-weight : lighter;

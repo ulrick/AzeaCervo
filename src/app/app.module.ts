@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
 import { NgModule, ErrorHandler } from '@angular/core';
-import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { IonicApp, IonicModule, IonicErrorHandler, ToastController } from 'ionic-angular';
 import { MyApp } from './app.component';
 
 import { HomePage } from '../pages/home-page/home-page';
@@ -14,14 +14,19 @@ import { AnnouncementComponent } from '../pages/announcement/announcement.compon
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { AnnouncementDetail } from "../pages/announcement/announcement-detail";
-import { AddAnnouncement } from '../pages/add-announcement/add-announcement';
 import { Camera } from "@ionic-native/camera";
 import { FilePath } from "@ionic-native/file-path";
 import { Transfer } from "@ionic-native/transfer";
 import { File } from "@ionic-native/file";
 import { SpinnerDialog } from '@ionic-native/spinner-dialog';
 import { AnnouncementService } from "../providers/announcement-service";
+import { UserService } from "../providers/user-service";
+import { LocationService } from "../providers/location-service";
+import { NotificationManager } from "../providers/notification-manager";
 import { Network } from '@ionic-native/network';
+
+
+
 
 
 @NgModule({
@@ -67,7 +72,11 @@ import { Network } from '@ionic-native/network';
     SpinnerDialog,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     AnnouncementService,
-    Network
+    UserService,
+    LocationService,
+    Network,
+    ToastController,
+    NotificationManager
   ]
 })
 export class AppModule {}

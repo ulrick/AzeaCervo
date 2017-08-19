@@ -1,4 +1,6 @@
 import { Announcement } from "../pages/announcement/announcement";
+import { User } from "../pages/user/user";
+import { Location } from "../pages/location/location";
 
 export interface IDistrict {
     id : number,
@@ -22,9 +24,26 @@ export interface IAnnouncement {
 export interface IAnnouncementService {
 
     create(announcement : Announcement) : Promise<Announcement>;
-    read() : Promise<Announcement[]>;
+    read() : Promise<any>;
     update(announcement : Announcement) : Promise<Announcement>;
     delete(announcement : Announcement) : Promise<Announcement>;
+}
+
+export interface IUserService {
+
+    create(user : User) : Promise<any>;
+    read() : Promise<User[]>;
+    update(user : User) : Promise<User>;
+    delete(user : User) : Promise<User>;
+}
+
+
+export interface ILocationService {
+
+    create(location : Location) : Promise<any>;
+    read() : Promise<Location[]>;
+    update(location : Location) : Promise<Location>;
+    delete(location : Location) : Promise<Location>;
 }
 
 
@@ -53,4 +72,7 @@ export interface IHomePage {
      * @memberof IHomePage
      */
     addAnnouncement(): void;
+
+
+    getUsers(): void;
 } 

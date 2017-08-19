@@ -1,5 +1,6 @@
 import { IDistrict } from "./interfaces";
 import { Announcement } from "../pages/announcement/announcement";
+import { User } from "../user/user";
 
 export const ADS: Announcement[] = [
     {
@@ -10,7 +11,9 @@ export const ADS: Announcement[] = [
         message: "Je vends une Samsung neuf avec sa boite d'origine. ", 
         price: 120, 
         photo: "",
-        date: "2017-04-23 16:25:00"
+        date: "2017-04-23 16:25:00",
+        user: {id : 1, username : "yawo", email : "ymanasse@gmail.com", telephone : "0760797742"},
+        location: {id : 1, city : "Attiégou", region : ""}
     },
     {
         id: 2,
@@ -20,7 +23,9 @@ export const ADS: Announcement[] = [
         message: "Je vends une Samsung neuf avec sa boite d'origine. ", 
         price: 100, 
         photo: "", 
-        date: "2017-04-24 16:25:00"
+        date: "2017-04-24 16:25:00",
+        user: {id : 2, username : "kodjo", email : "ymanasse@gmail.com", telephone : "0760797742"},
+        location: {id : 2, city : "Togo 2000", region : ""}
     }
 ];
 
@@ -48,10 +53,14 @@ export const DISTRICT: IDistrict[] = [
     }
 ];
 
-export const BASE_URI: string = "http://www.manasse-yawo.com/azea-cervo";
+export const BASE_URI : string = "http://www.manasse-yawo.com/azea-cervo";
 
 
 /**
  * Target the uploads photo folder : "http://www.manasse-yawo.com/azea-cervo/uploads/"
  */
-export const TARGET_PHOTO_FOLDER: string = "http://www.manasse-yawo.com/azea-cervo/uploads/";
+export const TARGET_PHOTO_FOLDER : string = "http://www.manasse-yawo.com/azea-cervo/uploads/";
+
+
+// Destination img URL
+export const UPLOAD_IMG_URL : string  = "http://www.manasse-yawo.com/azea-cervo/upload.php";

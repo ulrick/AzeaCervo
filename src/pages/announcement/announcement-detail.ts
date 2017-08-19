@@ -1,6 +1,6 @@
 // Ctrl + Alt + D twice to comment
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, ActionSheetController, ToastController, Platform, LoadingController, Loading } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, ActionSheetController, Platform, LoadingController, Loading } from 'ionic-angular';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Http, Headers, RequestOptions } from '@angular/http';
 import { File } from '@ionic-native/file';
@@ -16,6 +16,9 @@ import { AnnouncementService } from "../../providers/announcement-service";
 import { Utils } from "../../model/utils";
 import { TARGET_PHOTO_FOLDER } from "../../model/consts";
 import { AddAnnouncement } from "../add-announcement/add-announcement";
+import { NotificationManager } from "../../providers/notification-manager";
+import { UserService } from "../../providers/user-service";
+import { LocationService } from "../../providers/location-service";
 
 
 declare var cordova: any;
@@ -35,12 +38,12 @@ declare var cordova: any;
 export class AnnouncementDetail extends AddAnnouncement {
 
     // Initialise module classes
-    constructor( 
+    constructor(
                 public navCtrl              : NavController,
                 public http                 : Http,
                 public navParams            : NavParams,
                 public formBuilder          : FormBuilder,
-                public toastCtrl            : ToastController,
+                public toastCtrl            : NotificationManager,
                 public camera               : Camera,
                 public actionSheetCtrl      : ActionSheetController, 
                 public platform             : Platform, 
@@ -49,15 +52,22 @@ export class AnnouncementDetail extends AddAnnouncement {
                 public file                 : File,
                 public transfer             : Transfer,
                 public spinnerDialog        : SpinnerDialog,
-                protected announcementService : AnnouncementService
+                protected announcementService : AnnouncementService,
+                protected userService : UserService,
+                protected locationService : LocationService
           )
     {
-      super( navCtrl, http, navParams, formBuilder, toastCtrl, camera, actionSheetCtrl, platform, loadingCtrl, filePath, file, transfer, spinnerDialog, announcementService );
+      super( navCtrl, http, navParams, formBuilder, toastCtrl, camera, actionSheetCtrl, platform, loadingCtrl, filePath, file, transfer, spinnerDialog, announcementService, userService, locationService);
     }
 
     public editAnnouncement(announcement): void {
-        this.navCtrl.push('AddAnnouncement', announcement);
-        console.log("param ", announcement);
+
+      //announcement.user = this.user;
+      //this.user.username = announcement.username;
+      
+      this.navCtrl.push('AddAnnouncement', announcement);
+      console.log("param ", announcement);
+        
     }
 
 }

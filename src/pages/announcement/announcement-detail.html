@@ -9,12 +9,12 @@
 <ion-content>
 
   <ion-fab top right edge>
-    <button ion-fab mini (click)="editAnnouncement({ record: announcement })"><ion-icon name="create"></ion-icon></button>
+    <button ion-fab mini (click)="editAnnouncement({record : announcement})"><ion-icon name="create"></ion-icon></button>
   </ion-fab>
 
   <ion-card>
     <ion-card-header>
-      Nom du publicateur
+      {{announcement.user.username}}
     </ion-card-header>
 
     <div id="photo-content">
@@ -51,13 +51,13 @@
       <ion-col>
         <button ion-button icon-left clear small>
           <ion-icon name="thumbs-up"></ion-icon>
-          <div>Contacter</div>
+          <div>{{announcement.user.telephone}}</div>
         </button>
       </ion-col>
       <ion-col>
         <button ion-button icon-left clear small>
           <ion-icon name="text"></ion-icon>
-          <div>localisation</div>
+          <div>{{announcement.location.city}}</div>
         </button>
       </ion-col>
       <ion-col center text-center>

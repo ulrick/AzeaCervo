@@ -9,6 +9,7 @@ import { BASE_URI } from "../model/consts";
 import { SpinnerDialog } from "@ionic-native/spinner-dialog";
 import { IAnnouncementService } from "../model/interfaces";
 import { ToastController } from "ionic-angular";
+import { NotificationManager } from "./notification-manager";
 
 /*
   Generated class for the AnnouncementService provider.
@@ -23,12 +24,12 @@ export class AnnouncementService implements IAnnouncementService{
   //private dataUrl = BASE_URI + "/retrieve-data.php";
   private headers = new Headers({'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'});
 
-  constructor(public http: Http, private spinnerDialog : SpinnerDialog, private toastCtrl: ToastController) {
+  constructor(public http: Http, private spinnerDialog : SpinnerDialog, public toastCtrl: NotificationManager) {
   }
 
 
   /**
-   * Add new announcement service
+   * Add new announcement into the database
    * 
    * @param {Announcement} announcement
    * @returns {Promise<Announcement>} 
@@ -37,12 +38,39 @@ export class AnnouncementService implements IAnnouncementService{
    */
   public create(announcement : Announcement) : Promise<Announcement>{
 
-    let body     : string   = "key=create&title=" + announcement.title + "&message=" + announcement.message + "&price=" + announcement.price + "&date=" + announcement.date + "&photo=" + announcement.photo;
+    let body     : string   = "key=create&title=" + announcement.title + "&message=" + announcement.message + "&price=" + announcement.price + "&date=" + announcement.date + "&photo=" + announcement.photo + "&user=" + announcement.user.id+ "&location=" + announcement.location.id;
     return this.http
       .post(BASE_URI + "/manage-data.php", body, {headers: this.headers})
       .toPromise()
       .then(res => res.json().data as Announcement)
       .catch(this.handleError);
+  }
+
+
+  /**
+   * Gets and renders announcement from remote server
+   * 
+   * @returns {Promise<Announcement[]>}
+   * 
+   * @memberof AnnouncementService
+   */
+  public read(): Promise<any> {
+
+    //this.spinnerDialog.show("", "Chargements des données...");
+    return new Promise(resolve => {
+      this.http.get(BASE_URI + "/retrieve-data.php")
+        .map(res => res.json())
+        .subscribe(data =>{
+          this.announcements = data;
+          setTimeout(() => {
+            resolve(this.announcements);
+            this.spinnerDialog.hide();
+          }, 1000);
+        });
+    }).catch(error => {
+      this.handleError("Une erreur s'est produite. Vérifier la connexion!");
+      this.spinnerDialog.hide();
+    });
   }
 
 
@@ -66,32 +94,6 @@ export class AnnouncementService implements IAnnouncementService{
 
 
   /**
-   * Gets and renders announcement from remote server
-   * 
-   * @returns {Promise<Announcement[]>}
-   * 
-   * @memberof AnnouncementService
-   */
-  public read(): Promise<Announcement[]> {
-
-    this.spinnerDialog.show("", "Chargements des données...");
-    return new Promise(resolve => {
-      this.http.get(BASE_URI + "/retrieve-data.php")
-        .map(res => res.json())
-        .subscribe(data =>{
-          this.announcements = data;
-          setTimeout(() => {
-            resolve(this.announcements);
-            this.spinnerDialog.hide();
-          }, 2000);
-        });
-    }).catch(error => {
-      this.handleError("Une erreur s'est produite. Vérifier la connexion!");
-      this.spinnerDialog.hide();
-    });
-  }
-
-  /**
    * Remove announcement from server
    * 
    * @param {Announcement} announcement 
@@ -112,12 +114,7 @@ export class AnnouncementService implements IAnnouncementService{
 
 
   private handleError(error: any = "Une erreur est survenue!"): Promise<any> {
-    let notification = this.toastCtrl.create({
-            message       : error,
-            duration      : 3000,
-            position: 'bottom'
-        });
-        notification.present();
+    //let notification = this.toastCtrl.sendNotification(error);
     console.error('An error occurred', error);
     return Promise.reject(error.message || error);
   }

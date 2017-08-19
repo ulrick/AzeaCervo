@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Network } from '@ionic-native/network';
 import { SpinnerDialog } from "@ionic-native/spinner-dialog";
-import { ToastController } from "ionic-angular";
 import 'rxjs/add/operator/map';
 
 /*
@@ -16,7 +15,7 @@ export class NetworkManager {
 
   private networkState = this.network.type;
   
-  constructor(public http: Http, private network: Network, private spinnerDialog : SpinnerDialog, private toast: ToastController) {
+  constructor(public http: Http, private network: Network, private spinnerDialog : SpinnerDialog) {
 
   }
 

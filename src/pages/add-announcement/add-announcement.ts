@@ -1,4 +1,5 @@
 // Ctrl + Alt + D twice to comment
+// npm install --save --save-exact ionic@3.7.0 to go back to previous version
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ActionSheetController, ToastController, Platform, LoadingController, Loading } from 'ionic-angular';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
@@ -10,11 +11,17 @@ import { Camera, CameraOptions } from "@ionic-native/camera";
 import { SpinnerDialog } from '@ionic-native/spinner-dialog';
 
 import { Announcement } from "../announcement/announcement";
+import { User } from "../user/user";
+import { Location } from "../location/location";
 
-import 'rxjs/add/operator/map';
 import { AnnouncementService } from "../../providers/announcement-service";
+import { UserService } from "../../providers/user-service";
+import { LocationService } from "../../providers/location-service";
+import { NotificationManager } from "../../providers/notification-manager";
 import { Utils } from "../../model/utils";
-import { TARGET_PHOTO_FOLDER, BASE_URI } from "../../model/consts";
+import { TARGET_PHOTO_FOLDER, BASE_URI, UPLOAD_IMG_URL, DISTRICT } from "../../model/consts";
+import 'rxjs/add/operator/map';
+import { IDistrict } from "../../model/interfaces";
 
 
 declare var cordova: any;
@@ -30,16 +37,15 @@ declare var cordova: any;
 @Component({
   selector: 'page-add-announcement',
   templateUrl: 'add-announcement.html',
-  providers: [AnnouncementService]
+  providers: [AnnouncementService, UserService, LocationService, NotificationManager]
 })
 export class AddAnnouncement {
 
     // Define FormBuilder /model properties
     public form                   : FormGroup;
-    public announcementTitle      : any;
-    public announcementMessage    : any;
-    public announcementPhoto      : string;
     public announcement           : Announcement;
+    public user                   : User;
+    public location               : Location;
     // Flag to be used for checking whether we are adding/editing an entry
     public isEdited               : boolean = false;
     // Flag to hide the form upon successful completion of remote operation
@@ -48,9 +54,6 @@ export class AddAnnouncement {
     public pageTitle              : string;
     // Property to store the recordID for when an existing entry is being edited
     public recordID               : any     = null;
-    
-    // Destination URL
-    public uploadURL             : string  = "http://www.manasse-yawo.com/azea-cervo/upload.php";
 
     public lastImage: string = null;
     public hideBtn : boolean = true;
@@ -60,6 +63,8 @@ export class AddAnnouncement {
     public lastRecordID : number;
     public currentAdsID: number;
     public isNewPhoto: boolean = false;
+    public district: IDistrict[] = DISTRICT;
+    public selectOptions: any;
 
 
     // Initialise module classes
@@ -71,7 +76,7 @@ export class AddAnnouncement {
      * @param {Http} http 
      * @param {NavParams} navParams 
      * @param {FormBuilder} formBuilder 
-     * @param {ToastController} toastCtrl 
+     * @param {NotificationManager} toastCtrl 
      * @param {Camera} camera 
      * @param {ActionSheetController} actionSheetCtrl 
      * @param {Platform} platform 
@@ -88,7 +93,7 @@ export class AddAnnouncement {
                 public http                 : Http,
                 public navParams            : NavParams,
                 public formBuilder          : FormBuilder,
-                public toastCtrl            : ToastController,
+                public toastCtrl            : NotificationManager,
                 public camera               : Camera,
                 public actionSheetCtrl      : ActionSheetController, 
                 public platform             : Platform, 
@@ -97,8 +102,25 @@ export class AddAnnouncement {
                 public file                 : File,
                 public transfer            : Transfer,
                 public spinnerDialog       : SpinnerDialog,
-                protected announcementService : AnnouncementService)
+                protected announcementService : AnnouncementService,
+                protected userService : UserService,
+                protected locationService : LocationService)
     {
+    
+        this.user = {
+            id: null,
+            username: "",
+            password:"",
+            email: "", 
+            telephone: ""
+       };
+
+       this.location = {
+            id: null,
+            city:"",
+            region:""
+       }
+
        this.announcement = {
             id: null,
             category: "",
@@ -107,18 +129,33 @@ export class AddAnnouncement {
             message: "", 
             price: null, 
             photo: "",
-            date: ""
+            date: "",
+            user: this.user,
+            location : this.location
        };
 
         // Create form builder validation rules
         this.form = formBuilder.group({
             "title"                  : ["", Validators.required],
             "message"                : ["", Validators.required],
-            "price"                  : [""]
+            "price"                  : ["", Validators.required],
+            "username"               : ["", Validators.required],
+            "email"                  : ["", Validators.required],
+            "telephone"              : ["", Validators.required],      
+            "location"               : ["", Validators.required]
         });
+
+        this.district = DISTRICT;
+
+        this.selectOptions = {
+            //title: 'Villes',
+            subTitle: 'Selectionner une ville',
+            mode: 'ios'
+        };      
 
         if(this.images.length == 1)
             this.hideBtn = false;
+
     }
 
 
@@ -133,10 +170,14 @@ export class AddAnnouncement {
        //console.log(this.navParams);
       this.resetFields();
 
-      if(this.navParams.get("record"))
+      let adsParam = this.navParams.get("record");
+      
+      console.log("toto11 ", adsParam);
+
+      if(adsParam)
       {
          this.isEdited      = true;
-         this.selectEntry(this.navParams.get("record"));
+         this.selectEntry(adsParam);
          this.pageTitle     = 'Modifier';
       }
       else
@@ -159,6 +200,15 @@ export class AddAnnouncement {
         this.announcement.price                     = item.price;
         this.announcement.date                      = item.date;
         this.announcement.photo                     = item.photo;
+        this.announcement.location                  = item.location;
+        this.announcement.user                      = item.user;
+
+        this.user.username                          = item.user.username;
+        this.user.email                             = item.user.email;
+        this.user.telephone                         = item.user.telephone;
+        this.location.city                          = item.location.city;
+        this.location.region                        = item.location.region;
+
 
         this.images =  this.announcement.photo != "" ? Utils.buildPhotosPath(this.announcement.photo):[];
 
@@ -184,14 +234,33 @@ export class AddAnnouncement {
 
         if (!announcement) { return; }
 
-        announcement.photo = this.images.length != 0 ? Utils.splitImages(this.images) : "";
-        this.announcementService.create(announcement).then(add => {
-            if(this.images.length != 0){
-                this.uploadImage(this.images);
-            }
-            this.hideForm   = true;
-            this.sendNotification(`Congratulations the announcement: ${announcement.title} was successfully added`);
-        })
+        this.user.username = this.form.value.username;
+        this.user.email = this.form.value.email;
+        this.user.telephone = this.form.value.telephone;
+        announcement.user = this.user;
+
+        this.location.city = this.form.value.location;
+        announcement.location = this.location;
+    
+        this.userService.create(this.user).then(user => {
+
+            this.locationService.create(this.location).then(location => {
+
+                announcement.photo = this.images.length != 0 ? Utils.splitImages(this.images) : "";
+                announcement.user.id = parseInt(user.id);
+                announcement.location.id = parseInt(location.id);
+               
+                this.announcementService.create(announcement).then(add => {
+                    if(this.images.length != 0){
+                        this.uploadImage(this.images);
+                    }
+                    this.hideForm   = true;
+                    this.toastCtrl.sendNotification(`Annonce : ${announcement.title} ajouté avec succès!`);
+                    this.navCtrl.popToRoot();
+                })
+
+            })
+        })     
     }
 
     /**
@@ -210,12 +279,9 @@ export class AddAnnouncement {
             if(this.images.length != 0){
                 this.uploadImage(this.images);
             }
-            /*if(this.imagesToDelete.toString !== this.images.toString){
-                this.deletePhotoFromServer(this.imagesToDelete);
-                this.uploadImage(this.images);
-            }*/
             this.hideForm  =  true;
-            this.sendNotification(`Congratulations the technology: ${announcement.title} was successfully updated`);
+            this.toastCtrl.sendNotification(`Annonce: ${announcement.title} modifiée avec succès`);
+            this.navCtrl.popToRoot();
         })
     }
 
@@ -237,9 +303,11 @@ export class AddAnnouncement {
                 });
                 this.deletePhotoFromServer(images);
             }
+
+
             this.hideForm     = true;
-            this.sendNotification(`Congratulations the technology: ${announcement.title} was successfully deleted`);
-        });        
+            this.toastCtrl.sendNotification(`Annonce: ${announcement.title} supprimée avec succès!`);
+        });
     }
 
 
@@ -247,9 +315,16 @@ export class AddAnnouncement {
     // Determine whether we are adding a new record or amending an
     // existing record
     public saveEntry() {
-        
-        this.announcement = this.form.value;
+
+        this.announcement.title = this.form.value.title;
+        this.announcement.message    = this.form.value.message;
+        this.announcement.photo      = this.form.value.photo;
+        this.announcement.price     = this.form.value.price;
         this.announcement.date = Utils.getDateToRegister();
+        /*this.user.username          = this.form.value.username;
+        this.user.telephone         = this.form.value.telephone;
+        this.user.email             = this.form.value.email;
+        this.location.city          = this.form.value.city;*/
 
         if(this.isEdited){
             this.modifyAnnouncement(this.announcement);
@@ -265,20 +340,9 @@ export class AddAnnouncement {
         this.announcement.title      = "";
         this.announcement.message    = "";
         this.announcement.photo      = "";
-        this.announcement.price     = null;
-    }
-
-
-    // Manage notifying the user of the outcome
-    // of remote operations
-    protected sendNotification(message)  : void {
-
-        let notification = this.toastCtrl.create({
-            message       : message,
-            duration      : 3000,
-            position: 'top'
-        });
-        notification.present();
+        this.announcement.price      = null;
+        this.announcement.user       = null;
+        this.announcement.location   = null;
     }
 
 
@@ -336,7 +400,7 @@ export class AddAnnouncement {
             }
             this.isNewPhoto = true;
         }, (err) => {
-            this.sendNotification('Error while selecting image.');
+            this.toastCtrl.sendNotification('Une erreur est survenue!');
         });
     }
 
@@ -357,7 +421,7 @@ export class AddAnnouncement {
             this.images.push(this.lastImage);
             this.hideBtn = this.images.length == 1 ? false : true;
         }, error => {
-            this.sendNotification('Error while storing file.');
+            this.toastCtrl.sendNotification('Une erreur est survenue!');
         });
     } 
     
@@ -371,22 +435,7 @@ export class AddAnnouncement {
                 this.lastImage = img;
                 this.hideBtn = this.images.length == 1 ? false : true;
 
-                /*if(this.images == null || this.images.length == 0){
-                    return cordova.file.dataDirectory + img;
-                }*/
-
-                return TARGET_PHOTO_FOLDER + img;
-
-                //this.downloadImage(img);
-
-                //return img !== null ? cordova.file.dataDirectory + img : '';
-                /*let del = [];
-                if(this.imagesToDelete.length != 0){
-                    
-                }
-                else{
-                    return img !== null ? cordova.file.dataDirectory + img : '';
-                }     */       
+                return TARGET_PHOTO_FOLDER + img;    
             }
         
             return cordova.file.dataDirectory + img;
@@ -422,12 +471,12 @@ export class AddAnnouncement {
             
             // Use the FileTransfer to upload the image
             const fileTransfer: TransferObject = this.transfer.create();
-            fileTransfer.upload(targetPath, this.uploadURL, options).then(data => {
+            fileTransfer.upload(targetPath, UPLOAD_IMG_URL, options).then(data => {
                 this.loading.dismissAll()
                 //this.sendNotification('Image succesful uploaded.');
             }, err => {
                 this.loading.dismissAll()
-                this.sendNotification('Error while uploading file.');
+                this.toastCtrl.sendNotification('Erreur lors du chargement...');
             });
         })
     }
@@ -436,18 +485,15 @@ export class AddAnnouncement {
     protected downloadImage(img : string){
 
         if(img != ""){
-            
-            //this.images.forEach(element => {
 
-                var targetPath = this.file.dataDirectory + img;
+            var targetPath = this.file.dataDirectory + img;
 
-                const fileTransfer: TransferObject = this.transfer.create();
-                fileTransfer.download(TARGET_PHOTO_FOLDER, targetPath , true).then(data =>{
-                    console.log('download complete: ' + data.toURL());
-                }, err =>{
-                    this.sendNotification('Error while downloading file.');
-                });
-            //});
+            const fileTransfer: TransferObject = this.transfer.create();
+            fileTransfer.download(TARGET_PHOTO_FOLDER, targetPath , true).then(data =>{
+                console.log('download complete: ' + data.toURL());
+            }, err =>{
+                this.toastCtrl.sendNotification('Erreur lors du téléchargement');
+            });
         }
     }
     
@@ -518,7 +564,7 @@ export class AddAnnouncement {
                 // Otherwise let 'em know anyway
                 else
                 {
-                    this.sendNotification('Something went wrong!');
+                    this.toastCtrl.sendNotification('Une erreur est survenue!');
                 }
             });
         })    
