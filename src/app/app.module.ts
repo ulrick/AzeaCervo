@@ -24,9 +24,7 @@ import { UserService } from "../providers/user-service";
 import { LocationService } from "../providers/location-service";
 import { NotificationManager } from "../providers/notification-manager";
 import { Network } from '@ionic-native/network';
-
-
-
+import { GooglePlus } from "@ionic-native/google-plus";
 
 
 @NgModule({
@@ -76,7 +74,8 @@ import { Network } from '@ionic-native/network';
     LocationService,
     Network,
     ToastController,
-    NotificationManager
+    NotificationManager,
+    GooglePlus
   ]
 })
 export class AppModule {}

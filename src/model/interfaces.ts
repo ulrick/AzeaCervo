@@ -73,6 +73,4 @@ export interface IHomePage {
      */
     addAnnouncement(): void;
 
-
-    getUsers(): void;
 } 

@@ -12,6 +12,7 @@ export const ADS: Announcement[] = [
         price: 120, 
         photo: "",
         date: "2017-04-23 16:25:00",
+        city : "Attiégou",
         user: {id : 1, username : "yawo", email : "ymanasse@gmail.com", telephone : "0760797742"},
         location: {id : 1, city : "Attiégou", region : ""}
     },
@@ -24,6 +25,7 @@ export const ADS: Announcement[] = [
         price: 100, 
         photo: "", 
         date: "2017-04-24 16:25:00",
+        city : "Togo 2000",
         user: {id : 2, username : "kodjo", email : "ymanasse@gmail.com", telephone : "0760797742"},
         location: {id : 2, city : "Togo 2000", region : ""}
     }

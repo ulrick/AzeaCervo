@@ -85,7 +85,7 @@
 
                   <ion-item-divider color="light">LOCALISATION </ion-item-divider>
                   <ion-item>
-                    <ion-select formControlName="location" [(ngModel)]="location.city" interface="popover"	placeholder="Localiser votre annonce" [selectOptions]="selectOptions">
+                    <ion-select formControlName="city" [(ngModel)]="announcement.city" interface="action-sheet"	placeholder="Localiser votre annonce" [selectOptions]="selectOptions">
                       <ion-option *ngFor="let city of district" [value] = "city.name">{{city.name}}</ion-option>
                     </ion-select>
                       <!--ion-input

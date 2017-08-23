@@ -38,7 +38,7 @@ export class AnnouncementService implements IAnnouncementService{
    */
   public create(announcement : Announcement) : Promise<Announcement>{
 
-    let body     : string   = "key=create&title=" + announcement.title + "&message=" + announcement.message + "&price=" + announcement.price + "&date=" + announcement.date + "&photo=" + announcement.photo + "&user=" + announcement.user.id+ "&location=" + announcement.location.id;
+    let body     : string   = "key=create&title=" + announcement.title + "&message=" + announcement.message + "&price=" + announcement.price + "&date=" + announcement.date + "&city=" + announcement.city + "&photo=" + announcement.photo + "&user=" + announcement.user.id+ "&location=" + announcement.location.id;
     return this.http
       .post(BASE_URI + "/manage-data.php", body, {headers: this.headers})
       .toPromise()
@@ -84,7 +84,7 @@ export class AnnouncementService implements IAnnouncementService{
    */
   public update(announcement: Announcement): Promise<Announcement> {
     
-    let body       : string  = "key=update&title=" + announcement.title + "&message=" + announcement.message + "&price=" + announcement.price + "&date=" + announcement.date + "&recordID=" + announcement.id + "&photo=" + announcement.photo;
+    let body       : string  = "key=update&title=" + announcement.title + "&message=" + announcement.message + "&price=" + announcement.price + "&date=" + announcement.date + "&city=" + announcement.city + "&recordID=" + announcement.id + "&photo=" + announcement.photo;
     return this.http
       .post(BASE_URI + "/manage-data.php", body, {headers: this.headers})
       .toPromise()

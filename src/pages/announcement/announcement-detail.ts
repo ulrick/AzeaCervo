@@ -19,6 +19,7 @@ import { AddAnnouncement } from "../add-announcement/add-announcement";
 import { NotificationManager } from "../../providers/notification-manager";
 import { UserService } from "../../providers/user-service";
 import { LocationService } from "../../providers/location-service";
+import { GooglePlus } from "@ionic-native/google-plus";
 
 
 declare var cordova: any;
@@ -45,7 +46,7 @@ export class AnnouncementDetail extends AddAnnouncement {
                 public formBuilder          : FormBuilder,
                 public toastCtrl            : NotificationManager,
                 public camera               : Camera,
-                public actionSheetCtrl      : ActionSheetController, 
+                public actionSheetCtrl      : ActionSheetController,
                 public platform             : Platform, 
                 public loadingCtrl          : LoadingController,
                 public filePath             : FilePath, 
@@ -54,10 +55,11 @@ export class AnnouncementDetail extends AddAnnouncement {
                 public spinnerDialog        : SpinnerDialog,
                 protected announcementService : AnnouncementService,
                 protected userService : UserService,
-                protected locationService : LocationService
+                protected locationService : LocationService,
+                protected googlePlus: GooglePlus
           )
     {
-      super( navCtrl, http, navParams, formBuilder, toastCtrl, camera, actionSheetCtrl, platform, loadingCtrl, filePath, file, transfer, spinnerDialog, announcementService, userService, locationService);
+      super( navCtrl, http, navParams, formBuilder, toastCtrl, camera, actionSheetCtrl, platform, loadingCtrl, filePath, file, transfer, spinnerDialog, announcementService, userService, locationService, googlePlus);
     }
 
     public editAnnouncement(announcement): void {

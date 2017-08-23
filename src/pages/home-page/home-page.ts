@@ -19,12 +19,13 @@ import { User } from "../user/user";
 import { Location } from "../location/location";
 import { UserService } from "../../providers/user-service";
 import { LocationService } from "../../providers/location-service";
+import { GooglePlus } from "@ionic-native/google-plus";
 
 
 @Component({
   selector: 'home-page',
   templateUrl: 'home-page.html',
-  providers: [AnnouncementService, NetworkManager, NotificationManager]
+  providers: [AnnouncementService, NetworkManager, NotificationManager, GooglePlus]
 })
 export class HomePage implements OnInit, IHomePage {
 
@@ -41,7 +42,8 @@ export class HomePage implements OnInit, IHomePage {
                 private userService : UserService,
                 private locationService : LocationService,
                 private network : NetworkManager,
-                private spinnerDialog : SpinnerDialog) {
+                private spinnerDialog : SpinnerDialog,
+                private googlePlus: GooglePlus) {
     }
 
     ngOnInit(): void {
@@ -55,7 +57,8 @@ export class HomePage implements OnInit, IHomePage {
     }
 
     ionViewWillEnter() {
-        this.getAnnouncements();
+        //if(this.announcements == null )
+            this.getAnnouncements();
     }
 
     public getAnnouncements(): void {
@@ -101,29 +104,14 @@ export class HomePage implements OnInit, IHomePage {
         }
     }
 
-    public getUsers(): void {
-        if(this.network.isConnected()){
-        //this.spinnerDialog.show("", "Chargements des données...");
-        this.userService.read().then(
-            data => {        
-                this.users = data;
-                console.log("Users ",this.users);
-                //this.announcementsBackup = data;
-                this.spinnerDialog.hide();
-            }
-        );
-            
-      }
-      else{
-        //this.offlineGetAnnouncements();
-      }
-    }
 
     public addAnnouncement(): void {
         let lastRecord = {};
         lastRecord = _.maxBy(this.announcements, 'id'); // Return object containing the last max ID
         this.lastRecordParam = lastRecord != undefined ? lastRecord : {id : 0};
         this.navCtrl.push('AddAnnouncement', this.lastRecordParam); //Go to add announcement page
+
+        this.login();
     }
 
 
@@ -138,4 +126,10 @@ export class HomePage implements OnInit, IHomePage {
             refresher.complete();
         }, 1000);
     }
+
+    public login(){
+        this.googlePlus.login({})
+        .then(res => console.log(res))
+        .catch(err => console.error(err));
+   }
 }

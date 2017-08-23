@@ -9,6 +9,7 @@ import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/trans
 import { FilePath } from '@ionic-native/file-path';
 import { Camera, CameraOptions } from "@ionic-native/camera";
 import { SpinnerDialog } from '@ionic-native/spinner-dialog';
+import { GooglePlus } from '@ionic-native/google-plus';
 
 import { Announcement } from "../announcement/announcement";
 import { User } from "../user/user";
@@ -22,6 +23,7 @@ import { Utils } from "../../model/utils";
 import { TARGET_PHOTO_FOLDER, BASE_URI, UPLOAD_IMG_URL, DISTRICT } from "../../model/consts";
 import 'rxjs/add/operator/map';
 import { IDistrict } from "../../model/interfaces";
+import { HomePage } from "../home-page/home-page";
 
 
 declare var cordova: any;
@@ -37,7 +39,7 @@ declare var cordova: any;
 @Component({
   selector: 'page-add-announcement',
   templateUrl: 'add-announcement.html',
-  providers: [AnnouncementService, UserService, LocationService, NotificationManager]
+  providers: [AnnouncementService, UserService, LocationService, NotificationManager, GooglePlus]
 })
 export class AddAnnouncement {
 
@@ -104,7 +106,8 @@ export class AddAnnouncement {
                 public spinnerDialog       : SpinnerDialog,
                 protected announcementService : AnnouncementService,
                 protected userService : UserService,
-                protected locationService : LocationService)
+                protected locationService : LocationService,
+                protected googlePlus: GooglePlus)
     {
     
         this.user = {
@@ -130,6 +133,7 @@ export class AddAnnouncement {
             price: null, 
             photo: "",
             date: "",
+            city:"",
             user: this.user,
             location : this.location
        };
@@ -139,18 +143,19 @@ export class AddAnnouncement {
             "title"                  : ["", Validators.required],
             "message"                : ["", Validators.required],
             "price"                  : ["", Validators.required],
+            "city"                   : ["", Validators.required],
             "username"               : ["", Validators.required],
             "email"                  : ["", Validators.required],
-            "telephone"              : ["", Validators.required],      
-            "location"               : ["", Validators.required]
+            "telephone"              : ["", Validators.required]      
+            //"location"               : ["", Validators.required]
         });
 
         this.district = DISTRICT;
 
         this.selectOptions = {
-            //title: 'Villes',
-            subTitle: 'Selectionner une ville',
-            mode: 'ios'
+            title: 'Selectionner une ville',
+            //subTitle: 'Selectionner une ville',
+            mode: 'md'
         };      
 
         if(this.images.length == 1)
@@ -190,6 +195,10 @@ export class AddAnnouncement {
    }
 
 
+   
+   
+
+
     // Assign the navigation retrieved data to properties
     // used as models on the page's HTML form
     selectEntry(item : Announcement) {
@@ -199,6 +208,7 @@ export class AddAnnouncement {
         this.announcement.message                   = item.message;
         this.announcement.price                     = item.price;
         this.announcement.date                      = item.date;
+        this.announcement.city                      = item.city;
         this.announcement.photo                     = item.photo;
         this.announcement.location                  = item.location;
         this.announcement.user                      = item.user;
@@ -208,7 +218,6 @@ export class AddAnnouncement {
         this.user.telephone                         = item.user.telephone;
         this.location.city                          = item.location.city;
         this.location.region                        = item.location.region;
-
 
         this.images =  this.announcement.photo != "" ? Utils.buildPhotosPath(this.announcement.photo):[];
 
@@ -256,7 +265,6 @@ export class AddAnnouncement {
                     }
                     this.hideForm   = true;
                     this.toastCtrl.sendNotification(`Annonce : ${announcement.title} ajouté avec succès!`);
-                    this.navCtrl.popToRoot();
                 })
 
             })
@@ -281,7 +289,7 @@ export class AddAnnouncement {
             }
             this.hideForm  =  true;
             this.toastCtrl.sendNotification(`Annonce: ${announcement.title} modifiée avec succès`);
-            this.navCtrl.popToRoot();
+            
         })
     }
 
@@ -304,7 +312,6 @@ export class AddAnnouncement {
                 this.deletePhotoFromServer(images);
             }
 
-
             this.hideForm     = true;
             this.toastCtrl.sendNotification(`Annonce: ${announcement.title} supprimée avec succès!`);
         });
@@ -316,22 +323,20 @@ export class AddAnnouncement {
     // existing record
     public saveEntry() {
 
-        this.announcement.title = this.form.value.title;
-        this.announcement.message    = this.form.value.message;
-        this.announcement.photo      = this.form.value.photo;
-        this.announcement.price     = this.form.value.price;
-        this.announcement.date = Utils.getDateToRegister();
-        /*this.user.username          = this.form.value.username;
-        this.user.telephone         = this.form.value.telephone;
-        this.user.email             = this.form.value.email;
-        this.location.city          = this.form.value.city;*/
-
+        this.announcement.title         = this.form.value.title;
+        this.announcement.message       = this.form.value.message;
+        this.announcement.photo         = this.form.value.photo;
+        this.announcement.price         = this.form.value.price;
+        this.announcement.date          = Utils.getDateToRegister();
+        this.announcement.city          = this.form.value.city;
+        
         if(this.isEdited){
             this.modifyAnnouncement(this.announcement);
         }
         else{
             this.addAnnouncement(this.announcement);
         }
+        this.navCtrl.popToRoot();
     }
 
 
@@ -340,6 +345,7 @@ export class AddAnnouncement {
         this.announcement.title      = "";
         this.announcement.message    = "";
         this.announcement.photo      = "";
+        this.announcement.city       = "";
         this.announcement.price      = null;
         this.announcement.user       = null;
         this.announcement.location   = null;
