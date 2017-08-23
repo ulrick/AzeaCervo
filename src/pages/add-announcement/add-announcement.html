@@ -24,11 +24,11 @@
             <ion-row class="photo-area">
 
               <ion-col col-12 text-center>
-                <button class="add btn-center" ion-button item-right icon-left outline color="secondary" (click)="presentActionSheet()" [hidden]="lastImage !== null">
+                <button class="add btn-center" ion-button item-end icon-start outline color="secondary" (click)="presentActionSheet()" [hidden]="lastImage !== null">
                   <ion-icon name="ios-camera-outline"> </ion-icon>
                   Ajouter des photos
                 </button>
-                <p item-right [hidden]="lastImage !== null"><span>Astuces :</span> 
+                <p item-end [hidden]="lastImage !== null"><span>Astuces :</span> 
                   Une annonce avec photo est 10 fois plus consultée qu'une annonce sans photo
                 </p>
               </ion-col>
@@ -85,7 +85,7 @@
 
                   <ion-item-divider color="light">LOCALISATION </ion-item-divider>
                   <ion-item>
-                    <ion-select formControlName="city" [(ngModel)]="announcement.city" interface="action-sheet"	placeholder="Localiser votre annonce" [selectOptions]="selectOptions">
+                    <ion-select formControlName="city" [(ngModel)]="announcement.city" interface="popover"	placeholder="Localiser votre annonce" [selectOptions]="selectOptions">
                       <ion-option *ngFor="let city of district" [value] = "city.name">{{city.name}}</ion-option>
                     </ion-select>
                       <!--ion-input
@@ -131,7 +131,7 @@
                 <ion-item *ngIf="isEdited && !hideForm">
                   <button
                       ion-button
-                      item-right
+                      item-end
                       color="secondary"
                       text-center
                       block

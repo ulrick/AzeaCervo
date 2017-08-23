@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ModalController, Tabs, NavController, NavParams } from "ionic-angular";
+import { IonicPage, ModalController, Tabs, NavController, NavParams } from "ionic-angular";
 import { Http } from '@angular/http';
 import _ from "lodash";
 
@@ -21,7 +21,7 @@ import { UserService } from "../../providers/user-service";
 import { LocationService } from "../../providers/location-service";
 import { GooglePlus } from "@ionic-native/google-plus";
 
-
+@IonicPage()
 @Component({
   selector: 'home-page',
   templateUrl: 'home-page.html',

@@ -4,7 +4,7 @@ import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler, ToastController } from 'ionic-angular';
 import { MyApp } from './app.component';
 
-import { HomePage } from '../pages/home-page/home-page';
+//import { HomePage } from '../pages/home-page/home-page';
 import { ItemDetailsPage } from '../pages/item-details/item-details';
 import { ListPage } from '../pages/list/list';
 import { Offers } from '../pages/offers/offers-page';
@@ -30,7 +30,7 @@ import { GooglePlus } from "@ionic-native/google-plus";
 @NgModule({
   declarations: [
     MyApp,
-    HomePage,
+    //HomePage,
     ItemDetailsPage,
     ListPage,
     Offers,
@@ -53,7 +53,7 @@ import { GooglePlus } from "@ionic-native/google-plus";
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    HomePage,
+    //HomePage,
     ItemDetailsPage,
     ListPage,
     Offers,
